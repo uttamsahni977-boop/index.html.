@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="hi" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>prem_story_official - Digital Storybook</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        instaDark: '#0a0a0c',
+                        cardBg: '#12131a',
+                        cardBorder: '#232634',
+                        accentPink: '#ec4899',
+                        accentGold: '#f59e0b',
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            user-select: none;
+            background-color: #0a0a0c;
+            color: #f3f4f6;
+        }
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        /* Custom Instagram Post Card styling matching screenshot */
+        .insta-card {
+            background-color: #12131a;
+            border: 1px solid #232634;
+            border-radius: 1.5rem;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6);
+        }
+        /* Background sketch watermark effect */
+        .sketch-watermark {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-12deg);
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: rgba(255, 255, 255, 0.04);
+            white-space: nowrap;
+            pointer-events: none;
+            letter-spacing: 2px;
+            z-index: 0;
+            text-transform: uppercase;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between overflow-x-hidden selection:bg-pink-500 selection:text-white">
+
+    <!-- Top Instagram Profile Header -->
+    <header class="w-full py-3 px-4 sm:px-6 bg-[#0a0a0c]/95 backdrop-blur-md sticky top-0 z-50 flex flex-wrap justify-between items-center border-b border-zinc-800/80">
+        <div class="flex items-center space-x-3">
+            <div class="w-11 h-11 rounded-full p-[2px] bg-gradient-to-tr from-yellow-500 via-pink-500 to-purple-600 flex items-center justify-center shadow-lg">
+                <div class="w-full h-full bg-[#0a0a0c] rounded-full flex items-center justify-center text-pink-500 font-bold text-base">
+                    P
+                </div>
+            </div>
+            <div>
+                <div class="flex items-center gap-1.5">
+                    <span id="profile-name" class="font-bold text-sm text-zinc-100 tracking-wide">prem_story_official</span>
+                    <i class="fa-solid fa-circle-check text-sky-400 text-xs"></i>
+                </div>
+                <p id="profile-subtitle" class="text-xs text-zinc-400">Complete Storybook (8 Chapters)</p>
+            </div>
+        </div>
+
+        <!-- Language Switcher Bar matching screenshot -->
+        <div class="flex items-center bg-zinc-900/90 p-1 rounded-full border border-zinc-700/60 shadow-inner mt-2 sm:mt-0">
+            <button onclick="setLanguage('en')" id="lang-en" class="px-3 py-1 text-xs font-semibold rounded-full transition-all duration-300 text-zinc-400 hover:text-white">EN</button>
+            <button onclick="setLanguage('hi')" id="lang-hi" class="px-3 py-1 text-xs font-semibold rounded-full transition-all duration-300 text-zinc-400 hover:text-white">शुद्ध हिंदी</button>
+            <button onclick="setLanguage('hinglish')" id="lang-hinglish" class="px-3 py-1 text-xs font-semibold rounded-full transition-all duration-300 bg-gradient-to-r from-pink-600 to-rose-600 text-white font-bold shadow-md">Hinglish</button>
+        </div>
+    </header>
+
+    <!-- Main Carousel Container -->
+    <main class="flex-grow flex items-center justify-center px-3 py-6 relative">
+        
+        <!-- Navigation Arrow Left -->
+        <button onclick="prevSlide()" class="absolute left-2 sm:left-6 z-20 bg-zinc-900/90 hover:bg-zinc-800 text-zinc-200 p-3 rounded-full shadow-xl border border-zinc-700 transition-all duration-300 hover:scale-110 focus:outline-none hidden md:flex items-center justify-center">
+            <i class="fa-solid fa-chevron-left text-sm"></i>
+        </button>
+
+        <!-- Carousel Track Wrapper -->
+        <div class="w-full max-w-xl overflow-hidden relative">
+            <div id="carousel-track" class="flex transition-transform duration-500 ease-out no-scrollbar" style="touch-action: pan-y;">
+                <!-- Dynamic Slides injected here -->
+            </div>
+        </div>
+
+        <!-- Navigation Arrow Right -->
+        <button onclick="nextSlide()" class="absolute right-2 sm:right-6 z-20 bg-zinc-900/90 hover:bg-zinc-800 text-zinc-200 p-3 rounded-full shadow-xl border border-zinc-700 transition-all duration-300 hover:scale-110 focus:outline-none hidden md:flex items-center justify-center">
+            <i class="fa-solid fa-chevron-right text-sm"></i>
+        </button>
+    </main>
+
+    <!-- Footer Swipe Instruction & Branding -->
+    <footer class="w-full py-3 px-4 bg-[#0a0a0c] text-center border-t border-zinc-900">
+        <p id="footer-swipe-hint" class="text-xs text-zinc-400 flex items-center justify-center gap-1.5">
+            <i class="fa-solid fa-arrow-pointer text-pink-500 animate-pulse"></i> Horizontal swipe karein ya arrows ka use karein
+        </p>
+    </footer>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="fixed bottom-16 left-1/2 transform -translate-x-1/2 bg-zinc-900 border border-pink-500/50 text-pink-300 px-4 py-2 rounded-xl shadow-2xl text-sm transition-all duration-300 opacity-0 pointer-events-none z-50 flex items-center space-x-2">
+        <i class="fa-solid fa-circle-check text-pink-400"></i>
+        <span id="toast-msg">Copied successfully!</span>
+    </div>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        // Story Data with 8 chapters/slides matching screenshot structure
+        const storyData = [
+            {
+                chapter: 1,
+                sketchText: "Chapter 1 Sketch",
+                titles: {
+                    hi: "अध्याय 1: CSC सेंटर से शुरू हुई कहानी और वह एक मुलाकात",
+                    en: "Chapter 1: CSC Center & Pehli Mulaqat",
+                    hinglish: "Chapter 1: CSC Center Se Shuru Hui Kahani Aur Pehli Mulaqaat"
+                },
+                contents: {
+                    hi: [
+                        "शहर की चहल-पहल के बीच हरीश भैया की सीएससी (CSC) की दुकान हमेशा भरी रहती थी। फॉर्म भरने से लेकर डिजिटल काम तक, वहाँ लोगों का आना-जाना लगा रहता था। उसी दुकान पर बैठता था प्रेम—एक सीधा-साधा लड़का, जो दुकान का सारा काम संभालता था।",
+                        "जिंदगी सामान्य चल रही थी, तभी दुकान पर एक नया चेहरा आया—रवीना। भीमताल के जंगलियागाँव से आने वाली रवीना पहली बार फॉर्म भरवाने आई थी। प्रेम को पहली नजर में तो नहीं, लेकिन शायद उसकी सादगी और बातों में कुछ ऐसा लगा कि उसने प्रेम को अपने जाल में फंसाने का मोहरा बना लिया। रवीना ने जानबूझकर प्रेम से बातचीत बढ़ाई। धीरे-धीरे फॉर्म की औपचारिकताएं चैट में बदलने लगीं, और चैट मुलाकातों में।"
+                    ],
+                    en: [
+                        "Amidst the hustle and bustle of the city, Harish Bhaiya's CSC shop was always crowded. From filling out forms to digital tasks, people constantly visited. Sitting at that shop was Prem—a simple boy who managed all the shop's work.",
+                        "Life was normal until a new face arrived at the shop—Raveena. Coming from Jungliyagaon in Bhimtal, Raveena had come to fill out a form for the first time. Prem didn't fall for her at first sight, but something in her simplicity and words made her use Prem as a pawn. Raveena intentionally increased her interaction with Prem. Slowly, form formalities turned into chats, and chats turned into meetings."
+                    ],
+                    hinglish: [
+                        "Shehar ki chahal-pahal ke beech Harish Bhaiya ki CSC ki dukan hamesha bhari rehti thi. Form bharne se lekar digital kaam tak, wahan logo ka aana-jaana laga rehta tha. Usi dukan par baithta tha Prem—ek seedha-saadha ladka, jo dukan ka saara kaam sambhalta tha.",
+                        "Zindagi samanya chal rahi thi, tabhi dukan par ek naya chehra aaya—Raveena. Bhimtal ke Jungliyagaon se aane wali Raveena pehli baar form bharwane aayi thi. Prem ko pehli nazar mein toh nahi, lekin shayad uski saadgi aur baaton mein kuch aisa laga ki usne Prem ko apne jaal mein fasane ka mohra bana liya. Raveena ne jaanbujhkar Prem se baat badhane ki koshish ki. Dheere-dheere form ki opchariktaayein chat mein badalne lagin, aur chat mulaqaaton mein."
+                    ]
+                }
+            },
+            {
+                chapter: 2,
+                sketchText: "Chapter 2 Sketch",
+                titles: {
+                    hi: "अध्याय 2: चेतावनियाँ और अंधी दीवानगी",
+                    en: "Chapter 2: Chetawaniyaan Aur Andhi Deewangi",
+                    hinglish: "Chapter 2: Chetawaniyaan Aur Andhi Deewangi"
+                },
+                contents: {
+                    hi: [
+                        "प्यार का नशा सिर चढ़कर बोल रहा था। रवीना कॉलेज आती तो प्रेम से मिलती, लेकिन धीरे-धीरे उनकी बातचीत कम होने लगी। रवीना की दो सहेलियां—लक्ष्मी और उषा—ने प्रेम को कई बार समझाया कि वह जिस रास्ते पर चल रहा है, वह ठीक नहीं है। शुरुआत में गणेश नाम के एक लड़के ने भी प्रेम को चेताया था कि रवीना का पहले से ही बॉयफ्रेंड है।",
+                        "लेकिन प्रेम प्यार में इतना अंधा हो चुका था कि वह हर किसी को पागल समझता था और किसी की बात सुनने को तैयार नहीं था। उसे लगता था कि सब उससे जलते हैं और रवीना सिर्फ उसी की है। कॉलेज के चुनाव का माहौल था, हवा में सरगर्मी थी। एक दिन कॉलेज के पार्क में बैठे-बैठे बातों ही बातों में रवीना ने प्रेम को अपनी तरफ खींचा और उसने प्रेम के कंधे पर अपना सिर रखकर उसके गले पर अपने होंठ रख दिए। दोनों ने एक-दूसरे को किस किया। उस दिन प्रेम की खुशी का ठिकाना नहीं था; उसे लगा कि दुनिया की सारी जन्नत उसे मिल गई है।"
+                    ],
+                    en: [
+                        "The intoxication of love was at its peak. When Raveena came to college, she would meet Prem, but gradually their conversations started decreasing. Raveena's two friends—Lakshmi and Usha—tried to explain to Prem multiple times that the path he was walking on wasn't right. Initially, a boy named Ganesh also warned Prem that Raveena already had a boyfriend.",
+                        "However, Prem was so blinded by love that he considered everyone else crazy and was unwilling to listen to anyone. He felt everyone was jealous of him and Raveena belonged only to him. It was college election season, with excitement in the air. One day, sitting in the college park, Raveena pulled Prem towards herself, rested her head on his shoulder, and planted a kiss on his neck. They kissed each other. That day, Prem's happiness knew no bounds; he felt like all the paradise of the world was his."
+                    ],
+                    hinglish: [
+                        "Pyar ka nasha sir chadhkar bol raha tha. Raveena college aati toh Prem se milti, lekin dheere-dheere unki baat-cheet kam hone lagi. Raveena ki do saheliyan—Lakshmi aur Usha—ne Prem ko kai baar samjhaya ki woh jis raste par chal raha hai, woh theek nahi hai. Shuruat mein Ganesh naam ke ek ladke ne bhi Prem ko chetaya tha ki Raveena ka pehle se hi boyfriend hai.",
+                        "Lekin Prem pyar mein itna andha ho chuka tha ki woh har kisi ko pagal samajhta tha aur kisi ki baat sunne ko taiyar nahi tha. Use lagta tha ki sab usse jalte hain aur Raveena sirf usi ki hai. College ke chunav ka mahool tha, hawa mein sargrmi thi. Ek din college ke park mein baithe-baite baaton hi baaton mein Raveena ne Prem ko apni taraf khincha aur usne Prem ke kandhe par apna sir rakhkar uske gale par apne honth rakh diye. Dono ne ek-dusre ko kiss kiya. Us din Prem ki khushi ka thikana nahi tha; use laga ki duniya ki saari jannat use mil gayi hai."
+                    ]
+                }
+            },
+            {
+                chapter: 3,
+                sketchText: "Chapter 3 Sketch",
+                titles: {
+                    hi: "अध्याय 3: वह मनहूस दिन और बाइक का धोखा",
+                    en: "Chapter 3: Woh Manhoos Din Aur Bike Ka Dhokha",
+                    hinglish: "Chapter 3: Woh Manhoos Din Aur Bike Ka Dhokha"
+                },
+                contents: {
+                    hi: [
+                        "एक दिन प्रेम, दीपक के साथ कॉलेज गया था। कॉलेज के बाद दीपक के कुछ जरूरी काम से दोनों स्पोर्ट्स की दुकान की तरफ गए। रास्ते में अचानक उनकी बाइक जवाब दे गई और खराब हो गई। बाइक को ठीक कराने के लिए उन्हें काफी नीचे ढलान तक जाना पड़ा। ঠিক करते-करते पूरा एक घंटा बीत गया।",
+                        "जब किसी तरह बाइक ठीक हुई, तो वे वापस कॉलेज पहुँचे। कॉलेज पहुँचते ही प्रेम की नजर अचानक रवीना पर पड़ी। यह वही रवीना थी जिसने सुबह फोन पर साफ कह दिया था कि 'आज मैं कॉलेज नहीं आ रही हूँ!' प्रेम का दिल धक से रह गया। उसने कॉलेज के कोने-कोने में रवीना को एक पागल कुत्ते की तरह ढूँढा, लेकिन वह कहीं नहीं मिली।",
+                        "पूरा एक घंटा बीत जाने के बाद, जब वह मायूस होकर वापस CSC सेंटर लौटा, तो वहाँ रवीना की सहेलियाँ मिल गईं। प्रेम ने उनसे पूछा, 'रवीना कहाँ है?' उन्होंने इशारों में बताया, 'वह तो पार्क में है!' प्रेम के दिमाग में बिजली कौंध गई—वह अकेली पार्क में क्या कर रही है? गुस्से और शक की मिली-जुली लहर उसके अंदर उठी। उसने गुस्से में अर्जुन से बाइक की चाबी माँगी। अर्जुन ने पहले मना किया, लेकिन प्रेम के जिद करने पर मान गया।"
+                    ],
+                    en: [
+                        "One day, Prem went to college with Deepak. After college, for some important work of Deepak's, both went towards a sports shop. On the way, their bike suddenly broke down and stopped working. To get the bike fixed, they had to go quite far down a slope. Fixing it took a full hour.",
+                        "When the bike was somehow fixed, they returned to college. As soon as they reached college, Prem's eyes suddenly fell on Raveena. This was the same Raveena who had clearly stated on the phone in the morning, 'Today I am not coming to college!' Prem's heart skipped a beat. He searched every corner of college for Raveena like a mad dog, but she was nowhere to be found.",
+                        "After a full hour passed, when he dejectedly returned to the CSC center, Raveena's friends were there. Prem asked them, 'Where is Raveena?' They gestured, 'She is in the park!' Lightning struck Prem's mind—what is she doing alone in the park? A mixed wave of anger and suspicion arose inside him. In anger, he asked Arjun for the bike keys. Arjun initially refused, but agreed upon Prem's insistence."
+                    ],
+                    hinglish: [
+                        "Ek din Prem, Deepak ke sath college gaya tha. College ke baad Deepak ke kuch zaroori kaam se dono sports ki dukan ki taraf gaye. Raste mein achanak unki bike jawab de gayi aur kharab ho gayi. Bike ko theek karane ke liye unhe kafi neeche dhalan tak jana pada. Theek karte-karte pura ek ghanta beet gaya.",
+                        "Jab kisi tarah bike theek hui, toh we wapas college pahuche. College pahuchte hi Prem ki nazar achanak Raveena par padi. Yeh wahi Raveena thi jisne subah phone par saaf keh diya tha ki 'Aaj main college nahi aa rahi hoon!' Prem ka dil dhak se reh gaya. Usne college ke kone-kone mein Raveena ko ek pagal kutte ki tarah dhunda, lekin woh kahin nahi mili.",
+                        "Pura ek ghanta beet jaane ke baad, jab woh mayus hokar wapas CSC center lauta, toh wahan Raveena ki saheliyan mil gayi. Prem ne unse pucha, 'Raveena kahan hai?' Unhone ishaaron mein bataya, 'Woh toh park mein hai!' Prem ke dimaag mein bijli kaundh gayi—woh akeli park mein kya kar rahi hai? Gusse aur shak ki mili-juli lahar uske andar uthi. Usne gusse mein Arjun se bike ki chaabi maangi. Arjun ne pehle mana kiya, lekin Prem ke zid karne par maan gaya."
+                    ]
+                }
+            },
+            {
+                chapter: 4,
+                sketchText: "Chapter 4 Sketch",
+                titles: {
+                    hi: "अध्याय 4: पार्क का सच और पैरों तले खिसकती जमीन",
+                    en: "Chapter 4: Park Ka Sach Aur Pairo Tale Khisakti Zameen",
+                    hinglish: "Chapter 4: Park Ka Sach Aur Pairo Tale Khisakti Zameen"
+                },
+                contents: {
+                    hi: [
+                        "प्रेम गुस्से में बाइक भगाते हुए पार्क की तरफ बढ़ा। उसने शहर के एक-एक पार्क को खंगाल डाला, लेकिन वह कहीं नजर नहीं आई। तभी एक सूने से कोने वाले पार्क में उसने दो लोगों को बैठे देखा। जैसे ही उसने पास जाकर गौर से देखा, उसकी साँसें रुक गई—वह रवीना ही थी! लेकिन... वह किसी और के साथ बैठी थी!",
+                        "रवीना की तरफ से कोई जवाब नहीं आया। उसने नजरें झुका लीं। प्रेम ने फिर से कड़क आवाज में पूछा। इस बार रवीना ने बहुत ही धीमी, काँपती हुई आवाज में फुसफुसाया—'बॉयफ्रेंड...' प्रेम का दिल मानों सीने से बाहर आ गया। उसने चिल्लाते हुए कहा, 'तो फिर मैं कौन हूँ?!'",
+                        "रवीना ने बिना पलकें झपकाए बड़े आराम से वह बात कह दी जिसने प्रेम की दुनिया उजाड़ दी: 'मैंने आपको पहले ही बोला था कि हम सिर्फ बेस्ट फ्रेंड हैं। कुछ दिन पहले ही तो मैंने कहा था कि हमारे बीच का सब खत्म, आज से तुम मेरे सिर्फ बेस्ट फ्रेंड हो।' प्रेम को लगा कि यह कोई घटिया मज़ाक है। उसने हँसने की कोशिश करते हुए उस अनजान लड़के से पूछा, 'भाई, तू इसके साथ कब से है?' उस लड़के ने बड़े ही लापरवाह अंदाज में जवाब दिया, 'तीन साल से!'",
+                        "उस एक वाक्य ने प्रेम के पैरों के नीचे की जमीन हमेशा के लिए खींच ली। तीन साल! और वह बेवकूफ इसे अपना पहला प्यार समझ बैठा था। उसके शरीर में एक अजीब सी शिथिलता छा गई। उसने रवीना की तरफ देखा, चेहरे पर एक सूखी और बेजान सी मुस्कान लाई, और बिना एक शब्द बोले सीधे अपने घर की तरफ चल दिया।"
+                    ],
+                    en: [
+                        "Prem rushed towards the park, speeding the bike in anger. He searched every single park in the city, but she was nowhere to be seen. Then, in a secluded corner park, he saw two people sitting. As he went closer and looked intently, his breath stopped—it was Raveena! But... she was sitting with someone else!",
+                        "There was no response from Raveena. She lowered her gaze. Prem asked again in a stern voice. This time Raveena whispered in a very soft, trembling voice—'Boyfriend...' Prem's heart felt like it came out of his chest. He screamed, 'Then who am I?!'",
+                        "Raveena calmly said the words without blinking that shattered Prem's world: 'I already told you that we are only best friends. Just a few days ago I said everything between us is over, from today you are just my best friend.' Prem felt this was a cheap joke. Trying to laugh, he asked that unknown boy, 'Bro, how long have you been with her?' That boy replied nonchalantly, 'For 3 years!'",
+                        "That single sentence pulled the ground out from under Prem's feet forever. Three years! And this fool thought of her as his first love. A strange numbness swept through his body. He looked at Raveena, brought a dry and lifeless smile to his face, and without saying a single word, walked straight toward his home."
+                    ],
+                    hinglish: [
+                        "Prem gusse mein bike bhagate hue park ki taraf badha. Usne shehar ke ek-ek park ko khangal dala, lekin woh kahin nazar nahi aayi. Tabhi ek soone se kone wale park mein usne do logo ko baithe dekha. Jaise hi usne paas jakar gaur se dekha, uski saansein ruk gayi—woh Raveena hi thi! Lekin... woh kisi aur ke sath baithi thi!",
+                        "Raveena ki taraf se koi jawab nahi aaya. Usne nazrein jhuka liin. Prem ne phir se kadak aawaz mein pucha. Is baar Raveena ne bahut hi dheemi, kaapti hui aawaz mein fusfusaya—'Boyfriend...' Prem ka dil maano seene se bahar aa gaya. Usne chillate hue kaha, 'Toh phir main kaun hoon?!'",
+                        "Raveena ne bina palke jhupkaaye bade aaram se woh baat keh di jisne Prem ki duniya ujad di: 'Maine aapko pehle hi bola tha ki hum sirf best friend hain. Kuch din pehle hi toh maine kaha tha ki hamare beech ka sab khatam, aaj se tum mere sirf best friend ho.' Prem ko laga ki yeh koi ghatiya mazak hai. Usne hansne ki koshish karte hue us anjaan ladke se pucha, 'Bhai, tu iske sath kab se hai?' Us ladke ne bade hi laparwah andaaz mein jawab diya, 'Teen saal se!'",
+                        "Us ek vakya ne Prem ke pairo ke neeche ki zameen hamesha ke liye kheench li. Teen saal! Aur woh bewakoof ise apna pehla pyar samajh baitha tha. Uske sharir mein ek ajeeb si shithilta cha gayi. Usne Raveena ki taraf dekha, chehre par ek sukhi aur bejaan si muskan layi, aur bina ek shabd bole seedhe apne ghar ki taraf chal diya."
+                    ]
+                }
+            },
+            {
+                chapter: 5,
+                sketchText: "Epilogue Sketch",
+                titles: {
+                    hi: "उपसंहार: जैसा कर्म, वैसा फल",
+                    en: "Epilogue: As You Sow, So Shall You Reap",
+                    hinglish: "Upsamhar: Jaisa Karm, Waisa Phal"
+                },
+                contents: {
+                    hi: [
+                        "घर पहुँचते ही दीपक ने उसके इस कटाव का मजाक उड़ाने में कोई कसर नहीं छोड़ी। आखिरकार, पुराना वक्त भी याद आ गया—जब प्रेम खुद दीपक के पास गर्लफ्रेंड न होने पर उसका मजाक उड़ाया करता था और अकड़कर कहता था—'तेरे पास जीएफ नहीं है, तू क्या समझेगा प्यार क्या होता है?'",
+                        "आज वक्त ने वही चक्र घुमाकर प्रेम के ही सामने ला खड़ा कर दिया था।"
+                    ],
+                    en: [
+                        "As soon as they reached home, Deepak left no stone unturned in mocking his heartbreak. After all, the old times were also remembered—when Prem himself used to mock Deepak for not having a girlfriend and swaggeringly say—'You don't have a GF, what will you understand about what love is?'",
+                        "Today, time had turned that wheel and brought it right in front of Prem."
+                    ],
+                    hinglish: [
+                        "Ghar pahuchte hi Deepak ne uske is kataav ka mazak udane mein koi kasar nahi chhodi. Aakhirkaar, purana wakt bhi yaad aa gaya—jab Prem khud Deepak ke paas girlfriend na hone par uska mazak udaya karta tha aur akadkar kehta tha—'Tere paas GF nahi hai, tu kya samjhega pyar kya hota hai?'",
+                        "Aaj wakt ne wahi chakra ghumakar Prem ke hi samne la khada kar diya tha."
+                    ]
+                }
+            },
+            {
+                chapter: 6,
+                isCredits: true,
+                sketchText: "Team Story",
+                titles: {
+                    hi: "अंतिम स्लाइड: टीम स्टोरी और विशेष क्रेडिट्स",
+                    en: "Final Slide: Team Story & Special Credits",
+                    hinglish: "Antim Slide: Team Story & Special Credits"
+                },
+                contents: {
+                    hi: [
+                        "यह डिजिटल स्टोरीबुक प्रेम की सच्ची और दर्द भरी दास्ताँ पर आधारित है। इसे टीम स्टोरी की तरफ से एक बेहतरीन कलात्मक प्रस्तुति के रूप में तैयार किया गया है।"
+                    ],
+                    en: [
+                        "This digital storybook is based on Prem's true and heartbreaking tale, presented specially by Team Story with an artistic touch."
+                    ],
+                    hinglish: [
+                        "Yeh digital storybook Prem ki sachi aur dard bhari dastan par adharit hai, jise Team Story ki taraf se ek behtareen prastuti ke roop mein taiyar kiya gaya hai."
+                    ]
+                }
+            }
+        ];
+
+        let currentLang = 'hi';
+        let currentSlide = 0;
+        let likesCount = 3890;
+        let isLiked = false;
+        let isBookmarked = false;
+        const totalSlides = storyData.length;
+
+        // Toggle Like Button
+        function toggleLike() {
+            isLiked = !isLiked;
+            if (isLiked) {
+                likesCount++;
+            } else {
+                likesCount--;
+            }
+            document.getElementById('like-count').innerText = likesCount.toLocaleString();
+            const heartIcon = document.getElementById('heart-icon');
+            if (isLiked) {
+                heartIcon.className = "fa-solid fa-heart text-pink-500 text-xl transition transform scale-125";
+            } else {
+                heartIcon.className = "fa-regular fa-heart text-zinc-300 text-xl hover:text-white transition";
+            }
+        }
+
+        // Toggle Bookmark Button
+        function toggleBookmark() {
+            isBookmarked = !isBookmarked;
+            const bookmarkIcon = document.getElementById('bookmark-icon');
+            if (isBookmarked) {
+                bookmarkIcon.className = "fa-solid fa-bookmark text-amber-400 text-xl transition transform scale-125";
+                showToast(currentLang === 'hi' ? 'स्टोरी सेव हो गई! 🔖' : 'Story saved to bookmarks!');
+            } else {
+                bookmarkIcon.className = "fa-regular fa-bookmark text-zinc-300 text-xl hover:text-white transition";
+                showToast(currentLang === 'hi' ? 'स्टोरी अनसेव कर दी गई!' : 'Bookmark removed!');
+            }
+        }
+
+        // Render Carousel Slides matching screenshot layout
+        function renderSlides() {
+            const track = document.getElementById('carousel-track');
+            track.innerHTML = '';
+
+            storyData.forEach((slide, index) => {
+                const slideDiv = document.createElement('div');
+                slideDiv.className = "w-full flex-shrink-0 px-2 transition-all duration-300";
+                
+                let contentHTML = '';
+                
+                if (slide.isCredits) {
+                    slide.contents[currentLang].forEach(p => {
+                        contentHTML += `<p class="text-xs sm:text-sm text-zinc-300 leading-relaxed mb-3">${p}</p>`;
+                    });
+
+                    // Dedicated Team Story Credits Card
+                    contentHTML += `
+                        <div class="mt-2 pt-3 border-t border-zinc-800 bg-zinc-900/90 p-4 rounded-xl border border-zinc-700/60 shadow-lg relative overflow-hidden">
+                            <h3 class="text-xs sm:text-sm font-bold text-pink-400 mb-2 flex items-center gap-2">
+                                <i class="fa-solid fa-award text-amber-400"></i> From Team Story (विशेष प्रस्तुति)
+                            </h3>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs text-zinc-200 mb-3">
+                                <div class="bg-zinc-950/70 p-2.5 rounded-lg border border-zinc-800">
+                                    <span class="text-[10px] text-zinc-400 block font-semibold">यह कहानी किसकी है (Story of):</span>
+                                    <span class="font-bold text-white">प्रेम (Prem)</span>
+                                </div>
+                                <div class="bg-zinc-950/70 p-2.5 rounded-lg border border-zinc-800">
+                                    <span class="text-[10px] text-zinc-400 block font-semibold">लेखक (Story Written by):</span>
+                                    <span class="font-bold text-white">दीपक भैया (Deepak Bhaiya)</span>
+                                </div>
+                                <div class="bg-zinc-950/70 p-2.5 rounded-lg border border-zinc-800">
+                                    <span class="text-[10px] text-zinc-400 block font-semibold">निर्माता (Created by):</span>
+                                    <span class="font-bold text-white">उत्तम (Gemini)</span>
+                                </div>
+                                <div class="bg-zinc-950/70 p-2.5 rounded-lg border border-zinc-800 flex items-center justify-between">
+                                    <div>
+                                        <span class="text-[10px] text-zinc-400 block font-semibold">Instagram ID:</span>
+                                        <span class="font-bold text-white select-all text-pink-400">uttam13_03_2008</span>
+                                    </div>
+                                    <button onclick="copyInstagramID()" class="bg-pink-600 hover:bg-pink-500 text-white font-bold p-1.5 rounded-md text-[11px] transition shadow"><i class="fa-solid fa-copy"></i></button>
+                                </div>
+                            </div>
+                            <div class="bg-zinc-950 p-3 rounded-lg border border-pink-500/30 text-center shadow-inner">
+                                <p class="text-[11px] sm:text-xs font-semibold text-pink-300 italic">
+                                    "अगर आपको भी ऐसा शानदार प्रोजेक्ट बनवाना है, तो बस ₹2,200 देने पड़ेंगे... नहीं, नहीं! ₹200 में भी काम हो सकता है! 😉🔥"
+                                </p>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    slide.contents[currentLang].forEach(p => {
+                        contentHTML += `<p class="text-xs sm:text-sm text-zinc-300 leading-relaxed mb-3">${p}</p>`;
+                    });
+                }
+
+                slideDiv.innerHTML = `
+                    <div class="insta-card p-4 sm:p-5 relative overflow-hidden flex flex-col justify-between min-h-[460px]">
+                        <!-- Background sketch watermark matching user requirement -->
+                        <div class="sketch-watermark">${slide.sketchText}</div>
+
+                        <!-- Top Card Header -->
+                        <div class="relative z-10">
+                            <div class="flex justify-between items-center mb-3 pb-2 border-b border-zinc-800/80">
+                                <div class="flex items-center space-x-2">
+                                    <div class="w-7 h-7 rounded-full bg-gradient-to-tr from-yellow-500 to-pink-600 flex items-center justify-center text-[10px] font-bold text-white">P</div>
+                                    <div>
+                                        <h2 class="text-xs sm:text-sm font-bold text-white leading-tight">${slide.titles[currentLang]}</h2>
+                                        <span class="text-[10px] text-zinc-400">Slide ${index + 1} of ${totalSlides}</span>
+                                    </div>
+                                </div>
+                                <div class="flex items-center space-x-1.5 bg-zinc-900/80 px-2 py-1 rounded-full border border-zinc-800">
+                                    <button onclick="toggleLike()" class="flex items-center gap-1 focus:outline-none">
+                                        <i id="card-heart-${index}" class="fa-solid fa-heart text-pink-500 text-xs"></i>
+                                    </button>
+                                    <span id="card-like-count-${index}" class="text-xs font-semibold text-zinc-200">${likesCount.toLocaleString()}</span>
+                                </div>
+                            </div>
+
+                            <!-- Inner Slide Navigation Badge Header matching screenshot -->
+                            <div class="flex justify-between items-center mb-3">
+                                <span class="px-2.5 py-0.5 bg-pink-950/80 text-pink-400 text-[11px] font-semibold rounded-full border border-pink-800/50">
+                                    Slide ${index + 1} / ${totalSlides}
+                                </span>
+                                <span class="text-[11px] text-zinc-400 font-medium">
+                                    ${currentLang === 'hi' ? 'अध्याय' : 'Chapter'} ${index + 1}
+                                </span>
+                            </div>
+
+                            <!-- Scrollable Text Body -->
+                            <div class="space-y-2 overflow-y-auto max-h-[260px] pr-1 no-scrollbar relative z-10">
+                                ${contentHTML}
+                            </div>
+                        </div>
+
+                        <!-- Bottom Instagram Action Bar matching screenshot -->
+                        <div class="pt-3 border-t border-zinc-800/80 mt-3 relative z-10 flex flex-col space-y-2">
+                            <div class="flex justify-between items-center">
+                                <div class="flex items-center space-x-4">
+                                    <button onclick="toggleLike()" class="focus:outline-none">
+                                        <i id="heart-icon" class="${isLiked ? 'fa-solid fa-heart text-pink-500' : 'fa-regular fa-heart text-zinc-300'} text-xl hover:text-white transition"></i>
+                                    </button>
+                                    <button onclick="showToast(currentLang === 'hi' ? 'कमेंट सेक्शन खुला है!' : 'Comments feature')" class="focus:outline-none">
+                                        <i class="fa-regular fa-comment text-zinc-300 text-xl hover:text-white transition"></i>
+                                    </button>
+                                    <button onclick="copyInstagramID()" class="focus:outline-none">
+                                        <i class="fa-regular fa-paper-plane text-zinc-300 text-xl hover:text-white transition"></i>
+                                    </button>
+                                </div>
+                                <button onclick="toggleBookmark()" class="focus:outline-none">
+                                    <i id="bookmark-icon" class="${isBookmarked ? 'fa-solid fa-bookmark text-amber-400' : 'fa-regular fa-bookmark text-zinc-300'} text-xl hover:text-white transition"></i>
+                                </button>
+                            </div>
+
+                            <!-- Carousel Dot Indicators & Likes count footer -->
+                            <div class="flex justify-between items-center pt-1">
+                                <span class="text-xs font-semibold text-zinc-300"><span id="footer-likes">${likesCount.toLocaleString()}</span> likes</span>
+                                <div id="pagination-dots-card" class="flex space-x-1.5">
+                                    <!-- Rendered dots -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                track.appendChild(slideDiv);
+            });
+
+            renderDots();
+            updateCarouselPosition();
+        }
+
+        // Render Dots Pagination inside cards
+        function renderDots() {
+            const dotsContainers = document.querySelectorAll('#pagination-dots-card');
+            dotsContainers.forEach((container, containerIdx) => {
+                container.innerHTML = '';
+                for (let i = 0; i < totalSlides; i++) {
+                    const dot = document.createElement('span');
+                    dot.className = `h-1.5 rounded-full transition-all duration-300 ${i === currentSlide ? 'w-5 bg-pink-500' : 'w-1.5 bg-zinc-700'}`;
+                    container.appendChild(dot);
+                }
+            });
+        }
+
+        function updateCarouselPosition() {
+            const track = document.getElementById('carousel-track');
+            track.style.transform = `translateX(-${currentSlide * 100}%)`;
+            renderDots();
+        }
+
+        function nextSlide() {
+            if (currentSlide < totalSlides - 1) {
+                currentSlide++;
+                updateCarouselPosition();
+            }
+        }
+
+        function prevSlide() {
+            if (currentSlide > 0) {
+                currentSlide--;
+                updateCarouselPosition();
+            }
+        }
+
+        // Language Switcher Logic
+        function setLanguage(lang) {
+            currentLang = lang;
+            ['en', 'hi', 'hinglish'].forEach(l => {
+                const btn = document.getElementById(`lang-${l}`);
+                if (l === lang) {
+                    btn.className = "px-3 py-1 text-xs font-semibold rounded-full transition-all duration-300 bg-gradient-to-r from-pink-600 to-rose-600 text-white font-bold shadow-md";
+                } else {
+                    btn.className = "px-3 py-1 text-xs font-semibold rounded-full transition-all duration-300 text-zinc-400 hover:text-white";
+                }
+            });
+
+            if (lang === 'hi') {
+                document.getElementById('profile-subtitle').innerText = "पूर्ण डिजिटल स्टोरीबुक (8 अध्याय)";
+                document.getElementById('footer-swipe-hint').innerHTML = '<i class="fa-solid fa-arrow-pointer text-pink-500 animate-pulse"></i> चैप्टर बदलने के लिए होरिजेंटल स्वाइप करें या एरो बटन दबाएं';
+            } else if (lang === 'en') {
+                document.getElementById('profile-subtitle').innerText = "Complete Storybook (8 Chapters)";
+                document.getElementById('footer-swipe-hint').innerHTML = '<i class="fa-solid fa-arrow-pointer text-pink-500 animate-pulse"></i> Swipe horizontally or use arrow buttons to navigate chapters';
+            } else {
+                document.getElementById('profile-subtitle').innerText = "Complete Storybook (8 Chapters)";
+                document.getElementById('footer-swipe-hint').innerHTML = '<i class="fa-solid fa-arrow-pointer text-pink-500 animate-pulse"></i> Chapters switch karne ke liye horizontal swipe karein';
+            }
+
+            renderSlides();
+        }
+
+        // Copy Instagram ID functionality
+        function copyInstagramID() {
+            const dummy = document.createElement('textarea');
+            dummy.value = 'uttam13_03_2008';
+            document.body.appendChild(dummy);
+            dummy.select();
+            document.execCommand('copy');
+            document.body.removeChild(dummy);
+
+            showToast(currentLang === 'hi' ? 'इंस्टाग्राम आईडी कॉपी हो गई! 🎉' : 'Instagram ID copied successfully! 🎉');
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-msg').innerText = msg;
+            toast.classList.remove('opacity-0', 'pointer-events-none');
+            toast.classList.add('opacity-100');
+            setTimeout(() => {
+                toast.classList.remove('opacity-100');
+                toast.classList.add('opacity-0', 'pointer-events-none');
+            }, 2500);
+        }
+
+        // Touch & Swipe Support for Mobile Carousel
+        let touchStartX = 0;
+        let touchEndX = 0;
+
+        const trackElement = document.getElementById('carousel-track');
+        trackElement.addEventListener('touchstart', e => {
+            touchStartX = e.changedTouches[0].screenX;
+        }, {passive: true});
+
+        trackElement.addEventListener('touchend', e => {
+            touchEndX = e.changedTouches[0].screenX;
+            handleSwipe();
+        }, {passive: true});
+
+        function handleSwipe() {
+            if (touchEndX < touchStartX - 50) {
+                nextSlide();
+            }
+            if (touchEndX > touchStartX + 50) {
+                prevSlide();
+            }
+        }
+
+        // Keyboard Arrow Navigation
+        window.addEventListener('keydown', e => {
+            if (e.key === 'ArrowRight') nextSlide();
+            if (e.key === 'ArrowLeft') prevSlide();
+        });
+
+        // Initial Load
+        window.onload = () => {
+            renderSlides();
+        };
+    </script>
+</body>
+</html>
